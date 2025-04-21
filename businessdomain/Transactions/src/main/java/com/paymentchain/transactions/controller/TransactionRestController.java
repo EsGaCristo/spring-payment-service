@@ -5,13 +5,18 @@
  */
 package com.paymentchain.transactions.controller;
 
+import com.paymentchain.transactions.business.transaction.BusinessTransaction;
 import com.paymentchain.transactions.entities.Transaction;
+import com.paymentchain.transactions.exception.BusinessRuleException;
 import com.paymentchain.transactions.respository.TransactionRepository;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,26 +33,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/transaction")
 public class TransactionRestController {
-    
+
     @Autowired
     TransactionRepository transactionRepository;
     
-      
+    @Autowired
+    BusinessTransaction bt;
+
     @GetMapping()
-    public List<Transaction> list() {
-        return transactionRepository.findAll();
+    public ResponseEntity<?> list() {
+        List<Transaction> findAll = transactionRepository.findAll();
+        if (findAll.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(findAll);
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> get(@PathVariable(name = "id") long id) {
-         return transactionRepository.findById(id).map(x -> ResponseEntity.ok(x)).orElse(ResponseEntity.notFound().build());      
+        return transactionRepository.findById(id).map(
+                x -> ResponseEntity.ok(x)).orElse(ResponseEntity.notFound().build());
     }
-    
+
     @GetMapping("/customer/transactions")
-    public List<Transaction> get(@RequestParam(name = "ibanAccount") String ibanAccount) {
-      return transactionRepository.findByIbanAccount(ibanAccount);      
+    public ResponseEntity<?> get(@RequestParam(name = "ibanAccount") String ibanAccount) {
+        Optional<List<?>> findByIbanAccount = Optional.ofNullable(transactionRepository.findByIbanAccount(ibanAccount));
+        if(findByIbanAccount.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(findByIbanAccount);
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<?> put(@PathVariable(name = "id") long id, @RequestBody Transaction input) {
         Transaction find = transactionRepository.findById(id).get();
@@ -64,20 +80,21 @@ public class TransactionRestController {
         Transaction save = transactionRepository.save(find);
         return ResponseEntity.ok(save);
     }
-    
+
     @PostMapping
-    public ResponseEntity<?> post(@RequestBody Transaction input) {
-        Transaction save = transactionRepository.save(input);
-        return ResponseEntity.ok(save);
+    public ResponseEntity<?> post(@RequestBody Transaction input) throws UnknownHostException, BusinessRuleException {
+        Transaction post = bt.post(input);
+        // Transaction post = transactionRepository.save(input);
+        return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable(name = "id") long id) {
-        Optional<Transaction> findById = transactionRepository.findById(id);   
-        if(findById.get() != null){               
-                  transactionRepository.delete(findById.get());  
+        Optional<Transaction> findById = transactionRepository.findById(id);
+        if (findById.get() != null) {
+            transactionRepository.delete(findById.get());
         }
         return ResponseEntity.ok().build();
     }
-    
+
 }

@@ -2,13 +2,21 @@
     "configurations": [
         {
             "type": "java",
+            "name": "SpringBootAdminAplication",
+            "request": "launch",
+            "mainClass": "com.paymentchain.springbootadmin.SpringBootAdminAplication",
+            "projectName": "springbootadmin"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-ConfigserverApplication<configserver>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.paymentchain.configserver.ConfigserverApplication",
             "projectName": "configserver",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -18,7 +26,8 @@
             "mainClass": "com.paymentchain.customer.CustomerApplication",
             "projectName": "customer",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -28,7 +37,8 @@
             "mainClass": "com.paymentchain.eurekaServer.EurekaServerApplication",
             "projectName": "eurekaServer",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=35115 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=eurekaServer"
         },
         {
             "type": "java",
@@ -38,7 +48,8 @@
             "mainClass": "com.paymentchain.product.ProductApplication",
             "projectName": "product",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -47,6 +58,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.paymentchain.transactions.TransactionsApplication",
             "projectName": "transactions",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SpringBootAdminApplication<springBootAdmin>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.paymentchainparent.springBootAdmin.SpringBootAdminApplication",
+            "projectName": "springBootAdmin",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

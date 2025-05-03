@@ -1,0 +1,18 @@
+package com.paymentchain.billing.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+import lombok.Data;
+
+@Schema(name = "InvoiceRequest",description = "Model represent a invoice on database")
+@Data
+public class InvoiceResponse {
+    @Schema(name="invoiceId",requiredMode = RequiredMode.REQUIRED, example = "2",defaultValue = "1",description = "Unique Id of Invoice")
+    private long invoiceId;
+    @Schema(name="CustomerId",requiredMode = RequiredMode.REQUIRED, example = "2",defaultValue = "1",description = "Unique Id of Customer")
+    private long customer;
+        @Schema(name="number",requiredMode = RequiredMode.REQUIRED, example = "3",defaultValue = "8",description = "Number given on fisical invoice")
+    private String number;
+    private String detail;
+    private double amount;
+}

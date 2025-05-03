@@ -5,6 +5,10 @@
  */
 package com.paymentchain.billing.controller;
 
+import com.paymentchain.billing.common.InvoiceRequestMapper;
+import com.paymentchain.billing.common.InvoiceResponseMapper;
+import com.paymentchain.billing.dto.InvoiceRequest;
+import com.paymentchain.billing.dto.InvoiceResponse;
 import com.paymentchain.billing.entities.Invoice;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import com.paymentchain.billing.respository.InvoiceRepository;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 
@@ -25,37 +35,61 @@ import org.springframework.http.HttpStatus;
  *
  * @author sotobotero
  */
+@Tag(name = "Billing API",description = "This API serve all functionality for managment invoices")
 @RestController
 @RequestMapping("/billing")
 public class InvoiceRestController {
     
     @Autowired
     InvoiceRepository billingRepository;
+
+    @Autowired
+    InvoiceRequestMapper requestMapper;
+
+    @Autowired
+    InvoiceResponseMapper responseMapper;
+
     
+    @Operation(description = "Return all Invoices bundled into response", summary = "Return 204 if not data found")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",description = "Exito"),
+        @ApiResponse(responseCode = "500",description = "Internal Error"),
+    })
     @GetMapping()
-    public List<Invoice> list() {
-        return billingRepository.findAll();
+    public List<InvoiceResponse> list() {
+        List<Invoice> findAll =  billingRepository.findAll();
+        return responseMapper.InvoiceListToInvoiceResponseList(findAll);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<?>  get(@PathVariable long id) {
           Optional<Invoice> invoice = billingRepository.findById(id);
         if (invoice.isPresent()) {
-            return new ResponseEntity<>(invoice.get(), HttpStatus.OK);
+            InvoiceResponse invoiceToInvoiceResponse = responseMapper.InvoiceToInvoiceResponse(invoice.get());
+            return new ResponseEntity<>(invoiceToInvoiceResponse, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> put(@PathVariable String id, @RequestBody Invoice input) {
-        return null;
+    public ResponseEntity<?> put(@PathVariable String id, @RequestBody InvoiceRequest input) {
+        Invoice save = null;
+        Optional<Invoice>  findById = billingRepository.findById(Long.valueOf(id));
+        Invoice get = findById.get();
+        if(get !=null){
+            save = billingRepository.save(get);
+        } 
+
+        return ResponseEntity.ok(save);
     }
     
     @PostMapping
-    public ResponseEntity<?> post(@RequestBody Invoice input) {
-        Invoice save = billingRepository.save(input);
-        return ResponseEntity.ok(save);
+    public ResponseEntity<?> post(@RequestBody InvoiceRequest input) {
+        Invoice InvoiceRequestToInvoice = requestMapper.InvoiceRequestToInvoice(input);
+        Invoice save = billingRepository.save(InvoiceRequestToInvoice);
+        InvoiceResponse InvoiceToInvoiceResponse = responseMapper.InvoiceToInvoiceResponse(save);
+        return ResponseEntity.ok(InvoiceToInvoiceResponse);
     }
     
     @DeleteMapping("/{id}")
